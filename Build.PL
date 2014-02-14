@@ -11,7 +11,6 @@ my $build = Module::Build->new(
     license           => 'bsd',
     requires          => {
         perl                      => '>= 5.14.0',
-        'UAV::Pilot'              => '0.9',
         'namespace::autoclean'    => 0,
         'AnyEvent'                => 0,
         'AnyEvent::ReadLine::Gnu' => 0,
@@ -21,6 +20,7 @@ my $build = Module::Build->new(
         'MooseX::Event'           => 0,
         'String::CRC32'           => 0,
         'Test::More'              => 0,
+        'UAV::Pilot'              => '>= 0.9',
     },
     recommends => {
         'UAV::Pilot::SDL'           => 0,

@@ -1,10 +1,18 @@
-use Test::More tests => 10;
+use Test::More;
 use v5.14;
+
+eval "use UAV::Pilot::Video::H264Decoder";
+if( $@ ) {
+    plan skip_all => "UAV::Pilot::Video::Ffmepg not installed";
+}
+else {
+    plan tests => 10;
+}
+
 use UAV::Pilot;
 use UAV::Pilot::ARDrone::Driver::Mock;
 use UAV::Pilot::ARDrone::Video::Mock;
 use UAV::Pilot::ARDrone::Control;
-use UAV::Pilot::Video::H264Decoder;
 use UAV::Pilot::Video::Mock::RawHandler;
 use File::Temp ();
 use AnyEvent;

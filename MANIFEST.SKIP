@@ -73,7 +73,7 @@
 \bscripts/
 
 # Avoid archives of this distribution
-\bUAV-Pilot-[\d\.\_]+
+\bUAV-Pilot-ARDrone-[\d\.\_]+
 
 # Leftover video stream files from testing
 ardrone_video_stream.h264.*

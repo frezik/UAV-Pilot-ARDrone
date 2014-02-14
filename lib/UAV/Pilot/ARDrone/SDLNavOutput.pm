@@ -4,6 +4,7 @@ use Moose;
 use namespace::autoclean;
 use File::Spec;
 use Math::Trig ();
+# TODO relies on SDL
 use SDL;
 use SDLx::Text;
 use SDL::Event;

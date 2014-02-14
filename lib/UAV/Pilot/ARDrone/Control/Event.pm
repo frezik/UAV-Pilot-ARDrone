@@ -3,6 +3,7 @@ use v5.14;
 use Moose;
 use namespace::autoclean;
 use AnyEvent;
+# TODO relies on SDL
 use UAV::Pilot::SDL::Joystick;
 
 extends 'UAV::Pilot::ARDrone::Control';
