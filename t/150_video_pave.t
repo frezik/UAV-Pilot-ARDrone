@@ -1,4 +1,4 @@
-use Test::More tests => 6;
+use Test::More tests => 5;
 use v5.14;
 use UAV::Pilot;
 use UAV::Pilot::ARDrone::Driver::Mock;
@@ -27,7 +27,6 @@ my ($OUTPUT_FH, $OUTPUT_FILE) = File::Temp::tempfile( 'ardrone_video_stream.h264
 my $control_video = UAV::Pilot::Video::FileDump->new({
     fh => $OUTPUT_FH,
 });
-does_ok( $control_video => 'UAV::Pilot::Video::H264Handler' );
 
 my $cv = AnyEvent->condvar;
 my $ardrone = UAV::Pilot::ARDrone::Driver::Mock->new({
