@@ -22,6 +22,9 @@ my $build = Module::Build->new(
         'Test::More'              => 0,
         'UAV::Pilot'              => '>= 0.9',
     },
+    test_requires => {
+        'Test::Pod' => 0,
+    },
     recommends => {
         'UAV::Pilot::SDL'           => 0,
         'UAV::Pilot::Video::Ffmpeg' => 0,

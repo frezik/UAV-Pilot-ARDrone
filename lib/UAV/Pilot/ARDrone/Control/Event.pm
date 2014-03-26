@@ -189,7 +189,7 @@ an event loop, this module handles the timing for you.
     init_event_loop( $cv, $event )
 
 Sets up the event loop.  Takes C<$cv> (an C<AnyEvent::Condvar>) and C<$event> 
-(a C<UAV::Pilot::EasyEvent).
+(a C<UAV::Pilot::EasyEvent>).
 
 Will listen for joystick events.
 
