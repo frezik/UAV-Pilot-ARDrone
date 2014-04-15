@@ -47,6 +47,8 @@ sub emergency_restart
 sub _build_io
 {
     my ($class, $args) = @_;
+    return $args->{fh} if defined $args->{fh};
+
     my $file = $$args{file};
     open( my $fh, '<', $file ) 
         or UAV::Pilot::IOException->throw(
