@@ -27,6 +27,7 @@ use Moose;
 use namespace::autoclean;
 use IO::Socket::INET;
 use UAV::Pilot::Video::H264Handler;
+use Time::HiRes ();
 
 use Data::Dumper 'Dumper';
 $Data::Dumper::Sortkeys = 1;
@@ -218,6 +219,7 @@ sub _read_partial_pave_header
     my @bytes = $self->_byte_buffer_splice( 0, $self->PAVE_HEADER_PARTIAL_PROCESS_SIZE );
 
     my %packet;
+    $packet{'_initial_read_time'}    = [Time::HiRes::gettimeofday];
     $packet{signature}               = pack 'c4', @bytes[0..3];
     $packet{signature_int}           = UAV::Pilot->convert_32bit_LE( @bytes[0..3] );
     $packet{version}                 = $bytes[4];
@@ -283,6 +285,10 @@ sub _read_remaining_pave_header
     $self->_logger->info( "Frame num: " . $self->frames_processed
         . ", size: $packet{payload_size}" );
 
+
+    $self->_logger->info( 'VIDEO_FRAME_TIMER,START,' . $self->frames_processed
+        . ','
+        . join( ',', @{ +$packet{'_initial_read_time'} } ) );
 
     $self->_add_frames_processed( 1 );
     $self->_last_pave_header( \%packet );

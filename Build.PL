@@ -20,6 +20,7 @@ my $build = Module::Build->new(
         'MooseX::Event'           => 0,
         'String::CRC32'           => 0,
         'Test::More'              => 0,
+        'Time::HiRes'             => 0,
         'UAV::Pilot'              => '>= 0.9',
     },
     test_requires => {
