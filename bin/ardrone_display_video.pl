@@ -4,6 +4,8 @@ use warnings;
 use AnyEvent;
 use UAV::Pilot::ARDrone::Driver::Mock;
 use UAV::Pilot::ARDrone::Video::Mock;
+use UAV::Pilot::Events;
+use UAV::Pilot::SDL::Events;
 use UAV::Pilot::SDL::Video;
 use UAV::Pilot::SDL::Window;
 use UAV::Pilot::Video::H264Decoder;
@@ -11,6 +13,9 @@ use UAV::Pilot::Video::H264Decoder;
 
 {
     my $cv = AnyEvent->condvar;
+    my $events = UAV::Pilot::Events->new({
+        condvar => $cv,
+    });
 
     my $driver = UAV::Pilot::ARDrone::Driver::Mock->new({
         host => 'localhost',
@@ -33,6 +38,9 @@ use UAV::Pilot::Video::H264Decoder;
         driver   => $driver,
     });
 
-    $video->init_event_loop;
+    my $sdl_events = UAV::Pilot::SDL::Events->new;
+
+    $events->register( $_ ) for $sdl_events, $window;
+    $_->init_event_loop for $video, $events;
     $cv->recv;
 }
