@@ -21,16 +21,60 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
-use Test::More tests => 10;
+package UAV::Pilot::ARDrone::Video::Stream;
 use v5.14;
+use warnings;
+use Moose;
+use namespace::autoclean;
 
-use_ok( 'UAV::Pilot::ARDrone' );
-use_ok( 'UAV::Pilot::ARDrone::Driver' );
-use_ok( 'UAV::Pilot::ARDrone::Driver::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Control' );
-use_ok( 'UAV::Pilot::ARDrone::Control::Event' );
-use_ok( 'UAV::Pilot::ARDrone::NavPacket' );
-use_ok( 'UAV::Pilot::ARDrone::Video' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Stream' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Stream::Mock' );
+use constant BUF_READ_SIZE => 4096;
+
+with 'UAV::Pilot::ARDrone::Video::BuildIO';
+
+has '_io' => (
+    is     => 'ro',
+    isa    => 'Item',
+    writer => '_set_io',
+);
+has 'out_fh' => (
+    is  => 'ro',
+    isa => 'Item',
+);
+has 'condvar' => (
+    is  => 'ro',
+    isa => 'AnyEvent::CondVar',
+);
+has 'driver' => (
+    is  => 'ro',
+    isa => 'UAV::Pilot::ARDrone::Driver',
+);
+
+sub BUILDARGS
+{
+    my ($class, $args) = @_;
+    my $io = $class->_build_io( $args );
+
+    $$args{'_io'} = $io;
+    delete $$args{'host'};
+    delete $$args{'port'};
+    return $args;
+}
+
+
+sub _process_io
+{
+    my ($self) = @_;
+    my $buf;
+    my $read_count = $self->_io->read( $buf, $self->BUF_READ_SIZE );
+
+    $self->out_fh->print( $buf );
+
+    return 1;
+}
+
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
+1;
+__END__
+

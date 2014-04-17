@@ -1,7 +1,10 @@
 use UAV::Pilot::Exceptions;
 use UAV::Pilot::Video::FileDump;
 use UAV::Pilot::ARDrone::Video;
+use UAV::Pilot::ARDrone::Video::Stream;
 use UAV::Pilot::Events;
+
+use constant VIDEO_EXTERNAL_STREAM_EXEC => 'ardrone_display_video.pl';
 
 our $dev = undef;
 
@@ -156,6 +159,41 @@ sub record_usb ()
         return 1;
     };
 
+    my $start_video_single_process = sub {
+        $init_events->();
+        $init_sdl->();
+        $init_vid_driver->();
+        eval "use UAV::Pilot::SDL::Video";
+        die "Problem loading UAV::Pilot::SDL::Video: $@\n" if $@;
+        eval "use UAV::Pilot::Video::H264Decoder";
+        die "Problem loading UAV::Pilot::Video::H264Decoder: $@\n" if $@;
+
+        my $display = UAV::Pilot::SDL::Video->new;
+        my $video   = UAV::Pilot::Video::H264Decoder->new({
+            displays => [ $display ],
+        });
+        $vid_driver->add_handler( $video );
+        $display->add_to_window( $sdl, $sdl->TOP );
+
+        say "Outputting video";
+        return 1;
+    };
+    my $start_video_external_process = sub {
+        $init_events->();
+
+        open( my $out_fh, '|-', VIDEO_EXTERNAL_STREAM_EXEC )
+            or die "Can't execute " . VIDEO_EXTERNAL_STREAM_EXEC . ": $!\n";
+
+        my $video = UAV::Pilot::ARDrone::Video::Stream->new({
+            condvar => $cv,
+            driver  => $dev->driver,
+            out_fh  => $out_fh,
+        });
+
+        say "Outputting video on external process";
+        return 1;
+    };
+
 
     sub uav_module_init
     {
@@ -210,25 +248,13 @@ sub record_usb ()
         return 1;
     }
 
-    sub start_video ()
+    sub start_video (;$)
     {
-        $init_events->();
-        $init_sdl->();
-        $init_vid_driver->();
-        eval "use UAV::Pilot::SDL::Video";
-        die "Problem loading UAV::Pilot::SDL::Video: $@\n" if $@;
-        eval "use UAV::Pilot::Video::H264Decoder";
-        die "Problem loading UAV::Pilot::Video::H264Decoder: $@\n" if $@;
+        my ($use_single_process) = @_;
 
-        my $display = UAV::Pilot::SDL::Video->new;
-        my $video   = UAV::Pilot::Video::H264Decoder->new({
-            displays => [ $display ],
-        });
-        $vid_driver->add_handler( $video );
-        $display->add_to_window( $sdl, $sdl->TOP );
-
-        say "Ouputting video";
-        return 1;
+        return $use_single_process
+            ? $start_video_single_process->()
+            : $start_video_external_process->();
     }
 
     sub dump_video_to_file ($)

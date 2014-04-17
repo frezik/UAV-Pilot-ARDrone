@@ -21,16 +21,46 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
-use Test::More tests => 10;
+package UAV::Pilot::ARDrone::Video::BuildIO;
 use v5.14;
+use warnings;
+use Moose::Role;
 
-use_ok( 'UAV::Pilot::ARDrone' );
-use_ok( 'UAV::Pilot::ARDrone::Driver' );
-use_ok( 'UAV::Pilot::ARDrone::Driver::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Control' );
-use_ok( 'UAV::Pilot::ARDrone::Control::Event' );
-use_ok( 'UAV::Pilot::ARDrone::NavPacket' );
-use_ok( 'UAV::Pilot::ARDrone::Video' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Stream' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Stream::Mock' );
+
+sub _build_io
+{
+    my ($class, $args) = @_;
+    my $driver = $$args{driver};
+    my $host   = $driver->host;
+    my $port   = $driver->ARDRONE_PORT_VIDEO_H264;
+
+    my $io = IO::Socket::INET->new(
+        PeerAddr  => $host,
+        PeerPort  => $port,
+        ReuseAddr => 1,
+        Blocking  => 0,
+    ) or UAV::Pilot::IOException->throw(
+        error => "Could not connect to $host:$port for video: $@",
+    );
+    return $io;
+}
+
+sub init_event_loop
+{
+    my ($self) = @_;
+
+    my $io_event; $io_event = AnyEvent->io(
+        fh   => $self->_io,
+        poll => 'r',
+        cb   => sub {
+            $self->_process_io;
+            $io_event;
+        },
+    );
+    return 1;
+}
+
+
+1;
+__END__
+

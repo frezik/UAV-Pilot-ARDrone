@@ -1,6 +1,9 @@
 0.2 ???
 
-- 
+- Added bin/ardrone_display_video.pl for displaying video from a stream on STDIN
+- Added UAV::Pilot::ARDrone::Video::Stream to output the video stream directly 
+  to a filehandle
+- Busywork like license headers
 
 0.1 2014-02-16
 

@@ -91,6 +91,7 @@ use constant {
 
 
 with 'UAV::Pilot::Logger';
+with 'UAV::Pilot::ARDrone::Video::BuildIO';
 
 
 has '_io' => (
@@ -161,22 +162,6 @@ sub BUILDARGS
     return $args;
 }
 
-
-sub init_event_loop
-{
-    my ($self) = @_;
-
-    my $io_event; $io_event = AnyEvent->io(
-        fh   => $self->_io,
-        poll => 'r',
-        cb   => sub {
-            $self->_process_io;
-            $io_event;
-        },
-    );
-    return 1;
-}
-
 sub emergency_restart
 {
     my ($self) = @_;
@@ -189,24 +174,6 @@ sub emergency_restart
     return 1;
 }
 
-
-sub _build_io
-{
-    my ($class, $args) = @_;
-    my $driver = $$args{driver};
-    my $host   = $driver->host;
-    my $port   = $driver->ARDRONE_PORT_VIDEO_H264;
-
-    my $io = IO::Socket::INET->new(
-        PeerAddr  => $host,
-        PeerPort  => $port,
-        ReuseAddr => 1,
-        Blocking  => 0,
-    ) or UAV::Pilot::IOException->throw(
-        error => "Could not connect to $host:$port for video: $@",
-    );
-    return $io;
-}
 
 # We split reading the PaVE header into two parts.  The first part needs just enough bytes 
 # to get us to the packet size.  From there, we know how big the header will actually be, 

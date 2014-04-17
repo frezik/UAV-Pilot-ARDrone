@@ -1,0 +1,4 @@
+* Test share/ARDrone external video stream
+* Document:
+    * Video::BuildIO
+    * Video::Stream
