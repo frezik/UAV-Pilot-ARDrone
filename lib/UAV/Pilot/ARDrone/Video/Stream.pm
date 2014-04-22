@@ -29,25 +29,13 @@ use namespace::autoclean;
 
 use constant BUF_READ_SIZE => 4096;
 
-with 'UAV::Pilot::ARDrone::Video::BuildIO';
+extends 'UAV::Pilot::ARDrone::Video';
 
-has '_io' => (
-    is     => 'ro',
-    isa    => 'Item',
-    writer => '_set_io',
-);
 has 'out_fh' => (
     is  => 'ro',
     isa => 'Item',
 );
-has 'condvar' => (
-    is  => 'ro',
-    isa => 'AnyEvent::CondVar',
-);
-has 'driver' => (
-    is  => 'ro',
-    isa => 'UAV::Pilot::ARDrone::Driver',
-);
+
 
 sub BUILDARGS
 {

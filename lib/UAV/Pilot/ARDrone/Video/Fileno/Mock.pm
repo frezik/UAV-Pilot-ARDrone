@@ -21,18 +21,31 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
-use Test::More tests => 12;
+package UAV::Pilot::ARDrone::Video::Fileno::Mock;
 use v5.14;
+use warnings;
+use Moose;
+use namespace::autoclean;
 
-use_ok( 'UAV::Pilot::ARDrone' );
-use_ok( 'UAV::Pilot::ARDrone::Driver' );
-use_ok( 'UAV::Pilot::ARDrone::Driver::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Control' );
-use_ok( 'UAV::Pilot::ARDrone::Control::Event' );
-use_ok( 'UAV::Pilot::ARDrone::NavPacket' );
-use_ok( 'UAV::Pilot::ARDrone::Video' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Stream' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Stream::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Fileno' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Fileno::Mock' );
+extends 'UAV::Pilot::ARDrone::Video::Fileno';
+
+
+sub _build_io
+{
+    my ($class, $args) = @_;
+    return $args->{fh} if defined $args->{fh};
+
+    my $file = $$args{file};
+    open( my $fh, '<', $file ) 
+        or UAV::Pilot::IOException->throw(
+            error => "Could not open file '$file': $!",
+        );
+    return $fh;
+}
+
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
+1;
+__END__
+

@@ -21,18 +21,27 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
-use Test::More tests => 12;
+use Test::More tests => 3;
 use v5.14;
+use UAV::Pilot;
+use UAV::Pilot::ARDrone::Driver::Mock;
+use UAV::Pilot::ARDrone::Video::Fileno::Mock;
+use AnyEvent;
+use Test::Moose;
 
-use_ok( 'UAV::Pilot::ARDrone' );
-use_ok( 'UAV::Pilot::ARDrone::Driver' );
-use_ok( 'UAV::Pilot::ARDrone::Driver::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Control' );
-use_ok( 'UAV::Pilot::ARDrone::Control::Event' );
-use_ok( 'UAV::Pilot::ARDrone::NavPacket' );
-use_ok( 'UAV::Pilot::ARDrone::Video' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Stream' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Stream::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Fileno' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Fileno::Mock' );
+use constant VIDEO_DUMP_FILE => 't_data/ardrone_video_stream_dump.bin';
+
+
+my $cv = AnyEvent->condvar;
+my $ardrone = UAV::Pilot::ARDrone::Driver::Mock->new({
+    host => 'localhost',
+});
+my $video = UAV::Pilot::ARDrone::Video::Fileno::Mock->new({
+    file     => VIDEO_DUMP_FILE,
+    condvar  => $cv,
+    driver   => $ardrone,
+});
+isa_ok( $video => 'UAV::Pilot::ARDrone::Video::Fileno' );
+does_ok( $video => 'UAV::Pilot::ARDrone::Video::BuildIO' );
+
+ok( $video->fileno, "Returned fileno of input stream" );

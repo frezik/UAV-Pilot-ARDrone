@@ -9,7 +9,30 @@ use UAV::Pilot::SDL::Events;
 use UAV::Pilot::SDL::Video;
 use UAV::Pilot::SDL::Window;
 use UAV::Pilot::Video::H264Decoder;
+use Getopt::Long ();
 
+
+my $FILENO = undef;
+Getopt::Long::GetOptions(
+    'fileno=i' => \$FILENO,
+);
+
+
+
+sub get_input_fh
+{
+    my ($fileno) = @_;
+    my $fh = undef;
+
+    if( defined $fileno ) {
+        open( $fh, '<&=', $fileno ) or die "Can't open fileno '$fileno': $!\n";
+    }
+    else {
+        $fh = \*STDIN;
+    }
+
+    return $fh;
+}
 
 {
     my $cv = AnyEvent->condvar;
@@ -31,8 +54,9 @@ use UAV::Pilot::Video::H264Decoder;
     }));
     $vid_display->add_to_window( $window );
 
+    my $fh = get_input_fh( $FILENO );
     my $video = UAV::Pilot::ARDrone::Video::Mock->new({
-        fh       => \*STDIN,
+        fh       => $fh,
         handlers => \@h264_handlers,
         condvar  => $cv,
         driver   => $driver,

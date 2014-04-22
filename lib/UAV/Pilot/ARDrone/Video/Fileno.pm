@@ -21,18 +21,52 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
-use Test::More tests => 12;
+package UAV::Pilot::ARDrone::Video::Fileno;
 use v5.14;
+use warnings;
+use Moose;
+use namespace::autoclean;
+use Fcntl;
 
-use_ok( 'UAV::Pilot::ARDrone' );
-use_ok( 'UAV::Pilot::ARDrone::Driver' );
-use_ok( 'UAV::Pilot::ARDrone::Driver::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Control' );
-use_ok( 'UAV::Pilot::ARDrone::Control::Event' );
-use_ok( 'UAV::Pilot::ARDrone::NavPacket' );
-use_ok( 'UAV::Pilot::ARDrone::Video' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Stream' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Stream::Mock' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Fileno' );
-use_ok( 'UAV::Pilot::ARDrone::Video::Fileno::Mock' );
+extends 'UAV::Pilot::ARDrone::Video';
+
+
+sub BUILDARGS
+{
+    my ($class, $args) = @_;
+    my $io = $class->_build_io( $args );
+
+    $$args{'_io'} = $io;
+    delete $$args{'host'};
+    delete $$args{'port'};
+    return $args;
+}
+
+sub fileno
+{
+    my ($self, $do_clear_close_on_exec) = @_;
+    $do_clear_close_on_exec //= 1;
+
+    my $in = $self->_io;
+    if( $do_clear_close_on_exec ) {
+        # Clear the close-on-exec flag
+        my $flags = fcntl( $in, F_GETFD, 0 )
+            or die "fcntl F_GETFD: $!";
+        fcntl( $in, F_SETFD, $flags & ~FD_CLOEXEC )
+            or die "fcntl F_SETFD: $!";
+    }
+
+    return fileno $in;
+}
+
+sub init_event_loop
+{
+    # Do nothing, successfully
+}
+
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
+1;
+__END__
+

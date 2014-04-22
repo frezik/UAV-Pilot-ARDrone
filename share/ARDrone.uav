@@ -2,6 +2,7 @@ use UAV::Pilot::Exceptions;
 use UAV::Pilot::Video::FileDump;
 use UAV::Pilot::ARDrone::Video;
 use UAV::Pilot::ARDrone::Video::Stream;
+use UAV::Pilot::ARDrone::Video::Fileno;
 use UAV::Pilot::Events;
 
 use constant VIDEO_EXTERNAL_STREAM_EXEC => 'ardrone_display_video.pl';
@@ -174,6 +175,7 @@ sub record_usb ()
         });
         $vid_driver->add_handler( $video );
         $display->add_to_window( $sdl, $sdl->TOP );
+        $vid_driver->init_event_loop;
 
         say "Outputting video";
         return 1;
@@ -191,7 +193,30 @@ sub record_usb ()
         });
         $vid_driver->init_event_loop;
 
-        say "Outputting video on external process";
+        say "Outputting video on external process (pipe)";
+        return 1;
+    };
+    my $start_video_external_process_fileno = sub {
+        $init_events->();
+
+        $vid_driver = UAV::Pilot::ARDrone::Video::Fileno->new({
+            condvar => $cv,
+            driver  => $dev->driver,
+        });
+        my $fileno = $vid_driver->fileno;
+
+        $SIG{CHLD} = 'IGNORE';
+        my $child_pid = fork();
+        if( $child_pid ) {
+            # Parent process
+        }
+        else {
+            # Child process
+            exec( VIDEO_EXTERNAL_STREAM_EXEC, '--fileno=' . $fileno )
+                or die "Could not exec " . VIDEO_EXTERNAL_STREAM_EXEC . ": $!";
+        }
+
+        say "Outputting video on external process (fileno)";
         return 1;
     };
 
@@ -251,11 +276,13 @@ sub record_usb ()
 
     sub start_video (;$)
     {
-        my ($use_single_process) = @_;
+        my ($type) = @_;
+        $type //= 0;
 
-        return $use_single_process
-            ? $start_video_single_process->()
-            : $start_video_external_process->();
+        return
+            (0 == $type) ? $start_video_external_process_fileno->() :
+            (1 == $type) ? $start_video_external_process->() :
+            $start_video_single_process->();
     }
 
     sub dump_video_to_file ($)
