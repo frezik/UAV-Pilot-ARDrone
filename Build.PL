@@ -3,12 +3,17 @@ use warnings;
 use Module::Build;
 
 
+my @WINDOWS_REQUIRES = 'MSWin32' eq $^O
+    ? ('Win32API::File' => 0)
+    : ();
+
 my $build = Module::Build->new(
     module_name       => 'UAV::Pilot::ARDrone',
     dist_abstract     => 'UAV::Pilot driver for the Parrot AR.Drone',
     dist_author       => q{Timm Murray <tmurray@wumpus-cave.net>},
     dist_version_from => 'lib/UAV/Pilot/ARDrone.pm',
     license           => 'bsd',
+    dynamic_config    => 1, # for Windows requirements
     requires          => {
         perl                      => '>= 5.14.0',
         'namespace::autoclean'    => 0,
@@ -22,6 +27,7 @@ my $build = Module::Build->new(
         'Test::More'              => 0,
         'Time::HiRes'             => 0,
         'UAV::Pilot'              => '>= 0.9',
+        @WINDOWS_REQUIRES,
     },
     test_requires => {
         'Test::Pod' => 0,

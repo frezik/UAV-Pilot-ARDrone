@@ -160,6 +160,28 @@ sub record_usb ()
         return 1;
     };
 
+    my $fork_process_win32 = sub {
+        my (@args) = @_;
+        my $pid = system( 1, @args )
+            or die "Could not execute " . $args[0] . ": $!\n";
+        return $pid;
+    };
+    my $fork_process_unixy = sub {
+        my (@args) = @_;
+
+        my $pid = fork();
+        if( $pid ) {
+            # Parent
+        }
+        else {
+            # Child
+            exec( @args ) or die "Could not execute " . $args[0] . ": $!\n";
+        }
+
+        # Remember, child won't get here because of exec()
+        return $pid;
+    };
+
     my $start_video_single_process = sub {
         $init_events->();
         $init_sdl->();
@@ -206,15 +228,10 @@ sub record_usb ()
         my $fileno = $vid_driver->fileno;
 
         $SIG{CHLD} = 'IGNORE';
-        my $child_pid = fork();
-        if( $child_pid ) {
-            # Parent process
-        }
-        else {
-            # Child process
-            exec( VIDEO_EXTERNAL_STREAM_EXEC, '--fileno=' . $fileno )
-                or die "Could not exec " . VIDEO_EXTERNAL_STREAM_EXEC . ": $!";
-        }
+        my @exec = ( VIDEO_EXTERNAL_STREAM_EXEC, '--fileno=' . $fileno );
+        my $pid = 'MSWin32' eq $^O
+            ? $fork_process_win32->( @exec )
+            : $fork_process_unixy->( @exec );
 
         say "Outputting video on external process (fileno)";
         return 1;

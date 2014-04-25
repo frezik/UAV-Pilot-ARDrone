@@ -48,20 +48,52 @@ sub fileno
     $do_clear_close_on_exec //= 1;
 
     my $in = $self->_io;
-    if( $do_clear_close_on_exec ) {
-        # Clear the close-on-exec flag
-        my $flags = fcntl( $in, F_GETFD, 0 )
-            or die "fcntl F_GETFD: $!";
-        fcntl( $in, F_SETFD, $flags & ~FD_CLOEXEC )
-            or die "fcntl F_SETFD: $!";
-    }
+    my $fd = 'MSWin32' eq $^O
+        ? $self->_get_fd_win32( $in, $do_clear_close_on_exec )
+        : $self->_get_fd_unixy( $in, $do_clear_close_on_exec );
 
-    return fileno $in;
+    return $fd;
 }
 
 sub init_event_loop
 {
     # Do nothing, successfully
+}
+
+
+sub _get_fd_unixy
+{
+    my ($self, $in, $do_clear_close_on_exec) = @_;
+
+    if( $do_clear_close_on_exec ) {
+        # This code may not compile on Windows, so wrap it in an eval(STRING)
+        eval <<'END_EVAL';
+            use Fcntl;
+            my $flags = fcntl( $in, F_GETFD, 0 )
+                or die "fcntl F_GETFD: $!";
+            fcntl( $in, F_SETFD, $flags & ~FD_CLOEXEC )
+                or die "fcntl F_SETFD: $!";
+END_EVAL
+        die "Could not set close-on-exec flag: $@\n" if $@;
+    }
+
+    return CORE::fileno( $in );
+}
+
+sub _get_fd_win32
+{
+    my ($self, $in, $do_clear_close_on_exec) = @_;
+    # No close-on-exec flag for Windows, so ignore it
+
+    # This code won't compile on anything but Windows, so wrap it in 
+    # an eval(STRING)
+    my $fd = eval <<'END_EVAL';
+        use Win32::File 'FdGetOsFHandle';
+        FdGetOsFHandle( fileno( $in ) );
+END_EVAL
+    die "Could not get raw FD: $@\n" if $@;
+
+    return $fd;
 }
 
 
