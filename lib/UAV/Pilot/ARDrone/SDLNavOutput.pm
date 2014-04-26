@@ -67,6 +67,9 @@ use constant {
     VERT_SPEED_BORDER_WIDTH_MARGIN => 2,
     BATTERY_DISPLAY_X              => 450,
 
+    ROLL_PITCH_YAW_MAX_VALUE        => 30_000,
+    FEEDER_ROLL_PITCH_YAW_MAX_VALUE => 1.0,
+
     LINE_VALUE_HALF_MAX_HEIGHT => 10,
     LINE_VALUE_HALF_LENGTH     => 40,
 
@@ -278,9 +281,11 @@ sub draw
     if( defined $feeder) {
         my $feeder_line_color = $self->DRAW_FEEDER_VALUE_COLOR;
         $self->_draw_line_value( $feeder->cur_roll,
+            $self->FEEDER_ROLL_PITCH_YAW_MAX_VALUE,
             $self->ROLL_DISPLAY_X,  100,
             $feeder_line_color, $window );
         $self->_draw_line_value( $feeder->cur_pitch,
+            $self->FEEDER_ROLL_PITCH_YAW_MAX_VALUE,
             $self->PITCH_DISPLAY_X, 100,
             $feeder_line_color, $window );
         $self->_draw_circle_value( $feeder->cur_yaw,
@@ -293,9 +298,14 @@ sub draw
             $window );
     }
 
-    $self->_draw_line_value(   $nav->roll,    $self->ROLL_DISPLAY_X,  100, $line_color, $window );
-    $self->_draw_line_value(   $nav->pitch,   $self->PITCH_DISPLAY_X, 100, $line_color, $window );
-    $self->_draw_circle_value( $nav->yaw,     $self->YAW_DISPLAY_X,   100, $line_color, $window );
+    $self->_draw_line_value( $nav->roll,    
+        $self->ROLL_PITCH_YAW_MAX_VALUE,
+        $self->ROLL_DISPLAY_X,  100, $line_color, $window );
+    $self->_draw_line_value( $nav->pitch,
+        $self->ROLL_PITCH_YAW_MAX_VALUE,
+        $self->PITCH_DISPLAY_X, 100, $line_color, $window );
+    $self->_draw_circle_value( $nav->yaw,
+        $self->YAW_DISPLAY_X,   100, $line_color, $window );
 
     # Should we draw anything for altitude?
     $self->_draw_bar_percent_value( $nav->battery_voltage_percentage,
@@ -314,9 +324,10 @@ before 'got_new_nav_packet' => sub {
 
 sub _draw_line_value
 {
-    my ($self, $value, $center_x, $center_y, $color, $window) = @_;
+    my ($self, $value, $max_value, $center_x, $center_y, $color, $window) = @_;
 
-    my $y_addition = int( $self->LINE_VALUE_HALF_MAX_HEIGHT * $value );
+    my $corrected_value = $value / $max_value;
+    my $y_addition = int( $self->LINE_VALUE_HALF_MAX_HEIGHT * $corrected_value);
     my $right_y = $center_y - $y_addition;
     my $left_y  = $center_y + $y_addition;
 
