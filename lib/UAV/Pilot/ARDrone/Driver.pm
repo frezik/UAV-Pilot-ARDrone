@@ -695,7 +695,8 @@ sub _init_nav_sock_unicast
 after '_set_last_nav_packet' => sub {
     my ($self, $nav_packet) = @_;
     $self->_logger->info( "Received nav packet" );
-    $self->_logger->debug( "Output: " . $nav_packet->to_hex_string );
+    #$self->_logger->debug( "Raw Output: " . $nav_packet->to_hex_string );
+    #$self->_logger->debug( "Parsed Output: " . $nav_packet->to_string );
     $_->got_new_nav_packet( $nav_packet ) for @{ $self->nav_collectors };
     return 1;
 };

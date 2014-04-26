@@ -426,13 +426,13 @@ sub _parse_option_demo
 
     $args{control_state}              = $self->_convert_endian_32bit( @data[0..3]   );
     $args{battery_voltage_percentage} = $self->_convert_endian_32bit( @data[4..7]   );
-    $args{pitch}                      = $self->_to_float_32bit( @data[8..11]  );
-    $args{roll}                       = $self->_to_float_32bit( @data[12..15] );
-    $args{yaw}                        = $self->_to_float_32bit( @data[16..19] );
+    $args{pitch}                      = $self->_convert_endian_32bit( @data[8..11]  );
+    $args{roll}                       = $self->_convert_endian_32bit( @data[12..15] );
+    $args{yaw}                        = $self->_convert_endian_32bit( @data[16..19] );
     $args{altitude}                   = $self->_convert_endian_32bit( @data[20..23] );
-    $args{velocity_x}                 = $self->_to_float_32bit( @data[24..27] );
-    $args{velocity_y}                 = $self->_to_float_32bit( @data[28..31] );
-    $args{velocity_z}                 = $self->_to_float_32bit( @data[32..35] );
+    $args{velocity_x}                 = $self->_convert_endian_32bit( @data[24..27] );
+    $args{velocity_y}                 = $self->_convert_endian_32bit( @data[28..31] );
+    $args{velocity_z}                 = $self->_convert_endian_32bit( @data[32..35] );
     $args{video_frame_index}          = $self->_convert_endian_32bit( @data[36..39] );
     # Bytes 40 - 47 are for deprecated parameters
     $args{camera_detection_type}      = $self->_convert_endian_32bit( @data[48..51] );
