@@ -268,8 +268,8 @@ sub draw
         $self->ROLL_VALUE_X,     30, $txt_val );
     $window->draw_txt( sprintf('%.2f', $nav->pitch ),
         $self->PITCH_VALUE_X,    30, $txt_val );
-    $window->draw_txt( sprintf('%.2f', $nav->yaw ),
-        $self->YAW_VALUE_X,      30, $txt_val );
+    #$window->draw_txt( sprintf('%.2f', $nav->yaw ),
+    #    $self->YAW_VALUE_X,      30, $txt_val );
     $window->draw_txt( sprintf('%.2f cm', $nav->altitude ),
         $self->ALTITUDE_VALUE_X,     30, $txt_val );
     $window->draw_txt( $nav->battery_voltage_percentage . '%',
@@ -289,6 +289,7 @@ sub draw
             $self->PITCH_DISPLAY_X, 100,
             $feeder_line_color, $window );
         $self->_draw_circle_value( $feeder->cur_yaw,
+            $self->FEEDER_ROLL_PITCH_YAW_MAX_VALUE,
             $self->YAW_DISPLAY_X,   100,
             $feeder_line_color, $window );
         $self->_draw_line_vert_indicator( $feeder->cur_vert_speed,
@@ -304,8 +305,11 @@ sub draw
     $self->_draw_line_value( $nav->pitch,
         $self->ROLL_PITCH_YAW_MAX_VALUE,
         $self->PITCH_DISPLAY_X, 100, $line_color, $window );
-    $self->_draw_circle_value( $nav->yaw,
-        $self->YAW_DISPLAY_X,   100, $line_color, $window );
+    # For the AR.Drone, yaw this seems to be an absolute heading.  For now, 
+    # decided to only show the input rather than the value back from the UAV.
+    #$self->_draw_circle_value( $nav->yaw,
+    #    $self->ROLL_PITCH_YAW_MAX_VALUE,
+    #    $self->YAW_DISPLAY_X,   100, $line_color, $window );
 
     # Should we draw anything for altitude?
     $self->_draw_bar_percent_value( $nav->battery_voltage_percentage,
@@ -340,11 +344,14 @@ sub _draw_line_value
 
 sub _draw_circle_value
 {
-    my ($self, $value, $center_x, $center_y, $value_color, $window) = @_;
+    my ($self, $value, $max_value, $center_x, $center_y, $value_color, $window)
+        = @_;
     my $radius = $self->CIRCLE_VALUE_RADIUS;
     my $color = $self->DRAW_VALUE_COLOR;
 
-    my $angle  = Math::Trig::pip2 * $value; # Note use of radians, not degrees
+    my $corrected_value = $value / $max_value;
+    # Note use of radians, not degrees
+    my $angle  = Math::Trig::pip2 * $corrected_value;
     my $line_x = $center_x - (sin($angle) * $radius);
     my $line_y = $center_y - (cos($angle) * $radius);
 
