@@ -426,9 +426,9 @@ sub _parse_option_demo
 
     $args{control_state}              = $self->_convert_endian_32bit( @data[0..3]   );
     $args{battery_voltage_percentage} = $self->_convert_endian_32bit( @data[4..7]   );
-    $args{pitch}                      = $self->_convert_endian_32bit( @data[8..11]  );
-    $args{roll}                       = $self->_convert_endian_32bit( @data[12..15] );
-    $args{yaw}                        = $self->_convert_endian_32bit( @data[16..19] );
+    $args{pitch}                      = $self->_to_float_32bit_endian( @data[8..11]  );
+    $args{roll}                       = $self->_to_float_32bit_endian( @data[12..15] );
+    $args{yaw}                        = $self->_to_float_32bit_endian( @data[16..19] );
     $args{altitude}                   = $self->_convert_endian_32bit( @data[20..23] );
     $args{velocity_x}                 = $self->_convert_endian_32bit( @data[24..27] );
     $args{velocity_y}                 = $self->_convert_endian_32bit( @data[28..31] );
@@ -474,6 +474,17 @@ sub _to_float_32bit
         | ($bytes[2] << 8)
         | ($bytes[1] << 16)
         | ($bytes[0] << 24);
+    my $float = unpack( "f", pack( "l", $val ) );
+    return $float;
+}
+
+sub _to_float_32bit_endian
+{
+    my ($self, @bytes) = @_;
+    my $val = $bytes[0]
+        | ($bytes[1] << 8)
+        | ($bytes[2] << 16)
+        | ($bytes[3] << 24);
     my $float = unpack( "f", pack( "l", $val ) );
     return $float;
 }

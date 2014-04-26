@@ -21,7 +21,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
-use Test::More tests => 13;
+use Test::More tests => 12;
 use v5.14;
 use warnings;
 
@@ -185,10 +185,9 @@ my $demo_packet_data = make_packet( join('',
 my $demo_packet = UAV::Pilot::ARDrone::NavPacket->new({
     packet => $demo_packet_data
 });
-cmp_ok( $demo_packet->battery_voltage_percentage, '==', 0x59, "Battery volt parsed" );
-cmp_ok( $demo_packet->pitch, '==', -0.800000011920929, "Pitch parsed" );
-cmp_ok( $demo_packet->roll, '>', 2.99569025183973e-39, "Roll parsed (less than float)" );
-cmp_ok( $demo_packet->roll, '<', 2.99569025183975e-39, "Roll parsed (greater than float)" );
+cmp_ok( 0x59, '==', $demo_packet->battery_voltage_percentage, "Battery volt parsed" );
+cmp_ok( -428447712, '==', $demo_packet->pitch, "Pitch parsed" );
+cmp_ok( -1265, '==', $demo_packet->roll, "Roll parsed" );
 
 
 my $demo_packet_nan_data = make_packet( join('',
@@ -260,7 +259,7 @@ cmp_ok( -92, '==', $inflight_packet->pitch,
     "Pitch parse matches NodeCopter parse" );
 cmp_ok( -440, '==', $inflight_packet->roll,
     "Roll parse matches NodeCopter parse" );
-cmp_ok( 14688, '==', $inflight_packet->yaw,
+cmp_ok( 14668, '==', $inflight_packet->yaw,
     "Yaw parse matches NodeCopter parse" );
 
 
