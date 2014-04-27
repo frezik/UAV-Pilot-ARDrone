@@ -182,6 +182,7 @@ sub record_usb ()
         return $pid;
     };
 
+    my @PIDS;
     my $start_video_single_process = sub {
         $init_events->();
         $init_sdl->();
@@ -205,8 +206,9 @@ sub record_usb ()
     my $start_video_external_process = sub {
         $init_events->();
 
-        open( my $out_fh, '|-', VIDEO_EXTERNAL_STREAM_EXEC )
+        my $pid = open( my $out_fh, '|-', VIDEO_EXTERNAL_STREAM_EXEC )
             or die "Can't execute " . VIDEO_EXTERNAL_STREAM_EXEC . ": $!\n";
+        push @PIDS, $pid;
 
         $vid_driver = UAV::Pilot::ARDrone::Video::Stream->new({
             condvar => $cv,
@@ -232,9 +234,14 @@ sub record_usb ()
         my $pid = 'MSWin32' eq $^O
             ? $fork_process_win32->( @exec )
             : $fork_process_unixy->( @exec );
+        push @PIDS, $pid;
 
         say "Outputting video on external process (fileno)";
         return 1;
+    };
+
+    my $cleanup_processes = sub {
+        kill 'HUP', @PIDS;
     };
 
 
@@ -251,6 +258,11 @@ sub record_usb ()
         $dev = $cmd->controller_callback_ardrone->(
             $cmd, $cv, $easy_events );
         return 1;
+    }
+
+    sub uav_module_quit
+    {
+        $cleanup_processes->();
     }
 
 
