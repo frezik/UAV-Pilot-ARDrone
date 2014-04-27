@@ -1,5 +1,1 @@
-* Test share/ARDrone external video stream
-* Document:
-    * Video::BuildIO
-    * Video::Stream
-    * Video::Fileno
+* Video::BuildIO actually requires the methods its POD says it does

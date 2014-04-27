@@ -1,4 +1,4 @@
-0.2 ???
+0.2 2014-04-27
 
 - Added bin/ardrone_display_video.pl for displaying video from a stream on STDIN
   or using a file descriptor

@@ -66,3 +66,21 @@ __PACKAGE__->meta->make_immutable;
 1;
 __END__
 
+
+=head1 NAME
+
+  UAV::Pilot::ARDrone::Video::Stream
+
+=head1 DESCRIPTION
+
+A version of C<UAV::Pilot::ARDrone::Video> that writes the video stream to 
+another filehandle.  This can be used to write the video to an open file, or 
+to an external process over a pipe that will otherwise handle the video stream.
+
+=head1 ATTRIBUTES
+
+=head2 out_fh
+
+The filehandle to write out to.
+
+=cut

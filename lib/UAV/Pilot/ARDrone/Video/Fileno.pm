@@ -102,3 +102,19 @@ __PACKAGE__->meta->make_immutable;
 1;
 __END__
 
+
+=head1 NAME
+
+  UAV::Pilot::ARDrone::Video::Fileno
+
+=head1 DESCRIPTION
+
+A version of C<UAV::Pilot::ARDrone::Video> that launches an external process 
+and hands it a raw filehandle with C<fileno()>.  This is done in a 
+cross-platform way.  Note that on Windows, this requires C<Win32::File> to be 
+installed.
+
+Since no reading of the video stream is actual done, C<init_event_loop()> is 
+a NOP.
+
+=cut

@@ -64,3 +64,38 @@ sub init_event_loop
 1;
 __END__
 
+
+=head1 NAME
+
+  UAV::Pilot::ARDrone::Video::BuildIO
+
+=head1 DESCRIPTION
+
+Role for video stream handling modules to create the socket for reading the 
+stream from the Parrot AR.Drone.  Also sets up the AnyEvent io watcher.
+
+=head1 PROVIDES
+
+=head2 _build_io
+
+   $class->_build_io({ driver => $driver })
+
+Passed a C<UAV::Pilot::ARDrone::Driver>.  Sets up and returns a 
+C<IO::Socket::INET> object that connects to the host and video port for the 
+AR.Drone.
+
+=head2 init_event_loop
+
+Called to setup an AnyEvent io watcher to process the incoming video data.
+
+=head1 REQUIRES
+
+=head2 _io
+
+Returns a filehandle for reading video data.
+
+=head2 _process_io
+
+Called when there is IO data to read from C<_io>.
+
+=cut
