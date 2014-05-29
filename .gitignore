@@ -5,3 +5,5 @@ Makefile.PL
 blib
 MYMETA.*
 META.*
+*.tar.gz
+*.tar.bz2

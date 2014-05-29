@@ -1,4 +1,4 @@
-0.3 ???
+0.3 2014-05-29
 
 - Port build to Dist::Zilla
 - Actually release some things under UAV/Pilot/ARDrone/Video/ that were meant 
