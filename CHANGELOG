@@ -1,3 +1,10 @@
+0.3 ???
+
+- Port build to Dist::Zilla
+- Actually release some things under UAV/Pilot/ARDrone/Video/ that were meant 
+  to go with v0.2
+
+
 0.2 2014-04-27
 
 - Added bin/ardrone_display_video.pl for displaying video from a stream on STDIN
