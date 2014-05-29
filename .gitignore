@@ -1,5 +1,7 @@
 Build
 _build
+.build
+Makefile.PL
 blib
 MYMETA.*
 META.*
