@@ -1,3 +1,7 @@
+0.4 2014-06-03
+
+- ::Control::Events won't use UAV::Pilot::SDL::Joystick if it's not installed
+
 0.3 2014-05-29
 
 - Port build to Dist::Zilla
