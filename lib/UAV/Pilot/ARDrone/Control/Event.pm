@@ -26,8 +26,10 @@ use v5.14;
 use Moose;
 use namespace::autoclean;
 use AnyEvent;
-# TODO relies on SDL
-use UAV::Pilot::SDL::Joystick;
+
+eval "use UAV::Pilot::SDL::Joystick";
+my $CAN_LOAD_JOYSTICK = $@ ? 1 : 0;
+
 
 extends 'UAV::Pilot::ARDrone::Control';
 
@@ -74,9 +76,26 @@ has 'joystick_takeoff_btn_last_state' => (
     default => 0,
     writer  => '_set_joystick_takeoff_btn_last_state',
 );
+has 'do_init_joystick' => (
+    is      => 'ro',
+    isa     => 'Bool',
+    default => sub { $CAN_LOAD_JOYSTICK },
+);
 
 with 'UAV::Pilot::SDL::NavFeeder';
 
+
+
+sub BUILD
+{
+    my ($self) = @_;
+
+    if( $self->do_init_joystick && !$CAN_LOAD_JOYSTICK ) {
+        die "Can't init joystick, because UAV::Pilot::SDL is not installed\n";
+    }
+
+    return 1;
+}
 
 
 sub init_event_loop
@@ -113,10 +132,13 @@ sub init_event_loop
         },
     );
 
-    $event->add_event( UAV::Pilot::SDL::Joystick->EVENT_NAME, sub {
-        my (@args) = @_;
-        return $self->_process_sdl_input( @args );
-    });
+    if( $self->do_init_joystick ) {
+        $event->add_event( UAV::Pilot::SDL::Joystick->EVENT_NAME, sub {
+            my (@args) = @_;
+            return $self->_process_sdl_input( @args );
+        });
+    }
+
     return 1;
 }
 
