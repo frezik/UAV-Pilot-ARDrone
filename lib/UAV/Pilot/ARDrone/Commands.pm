@@ -1,3 +1,4 @@
+use v5.14;
 use UAV::Pilot::Exceptions;
 use UAV::Pilot::Video::FileDump;
 use UAV::Pilot::ARDrone::Video;
