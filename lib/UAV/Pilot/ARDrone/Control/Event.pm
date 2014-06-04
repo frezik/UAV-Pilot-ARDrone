@@ -29,6 +29,8 @@ use AnyEvent;
 
 eval "use UAV::Pilot::SDL::Joystick";
 my $CAN_LOAD_JOYSTICK = $@ ? 1 : 0;
+eval "use UAV::Pilot::SDL::NavFeeder";
+my $CAN_LOAD_NAV_FEEDER = $@ ? 1 : 0;
 
 
 extends 'UAV::Pilot::ARDrone::Control';
@@ -82,7 +84,7 @@ has 'do_init_joystick' => (
     default => sub { $CAN_LOAD_JOYSTICK },
 );
 
-with 'UAV::Pilot::SDL::NavFeeder';
+with 'UAV::Pilot::SDL::NavFeeder' if $CAN_LOAD_NAV_FEEDER;
 
 
 
