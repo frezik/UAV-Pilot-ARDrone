@@ -27,7 +27,7 @@ use warnings;
 use Moose;
 use namespace::autoclean;
 
-our $VERSION = 0.5;
+our $VERSION = 0.6;
 
 # ABSTRACT: Implements the Parrot AR.Drone under UAV::Pilot
 
