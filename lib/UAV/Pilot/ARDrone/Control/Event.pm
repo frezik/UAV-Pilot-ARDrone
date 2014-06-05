@@ -28,9 +28,9 @@ use namespace::autoclean;
 use AnyEvent;
 
 eval "use UAV::Pilot::SDL::Joystick";
-my $CAN_LOAD_JOYSTICK = $@ ? 1 : 0;
+my $CAN_LOAD_JOYSTICK = $@ ? 0 : 1;
 eval "use UAV::Pilot::SDL::NavFeeder";
-my $CAN_LOAD_NAV_FEEDER = $@ ? 1 : 0;
+my $CAN_LOAD_NAV_FEEDER = $@ ? 0 : 1;
 
 
 extends 'UAV::Pilot::ARDrone::Control';
@@ -85,6 +85,7 @@ has 'do_init_joystick' => (
 );
 
 with 'UAV::Pilot::SDL::NavFeeder' if $CAN_LOAD_NAV_FEEDER;
+with 'UAV::Pilot::Logger';
 
 
 
@@ -135,10 +136,15 @@ sub init_event_loop
     );
 
     if( $self->do_init_joystick ) {
+        $self->_logger->info( "Catching joystick events" );
         $event->add_event( UAV::Pilot::SDL::Joystick->EVENT_NAME, sub {
             my (@args) = @_;
             return $self->_process_sdl_input( @args );
         });
+    }
+    else {
+        $self->_logger->info( "Not catching joystick events"
+            . " (possible: $CAN_LOAD_JOYSTICK)" );
     }
 
     return 1;
