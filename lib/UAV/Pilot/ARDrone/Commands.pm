@@ -321,7 +321,7 @@ sub record_usb ()
         $init_vid_driver->();
 
         open( my $fh, '>', $file ) or UAV::Pilot::IOException->throw({
-            error => "Can't open [$file] for reading: $!\n",
+            error => "Can't open [$file] for writing: $!\n",
         });
         my $vid_dump = UAV::Pilot::Video::FileDump->new({
             fh => $fh,
