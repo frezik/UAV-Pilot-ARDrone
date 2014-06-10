@@ -35,6 +35,7 @@ use UAV::Pilot::ARDrone::Video::Mock;
 use UAV::Pilot::ARDrone::Control;
 use UAV::Pilot::Events;
 use UAV::Pilot::SDL::Events;
+use UAV::Pilot::SDL::Joystick;
 use UAV::Pilot::SDL::Video;
 use UAV::Pilot::SDL::VideoOverlay::Reticle;
 use UAV::Pilot::SDL::Window;
@@ -152,6 +153,7 @@ sub build_video_handlers
     my @h264_handlers;
     if( $DO_VIDEO || $VIDEO_OUT ) {
         if( $DO_VIDEO ) {
+            say "Starting real time video output . . . ";
             my $window = UAV::Pilot::SDL::Window->new;
             my $vid_display = UAV::Pilot::SDL::Video->new;
 
@@ -161,19 +163,38 @@ sub build_video_handlers
 
             $vid_display->add_to_window( $window );
             $events->register( $window );
+            say "Real time video output ready";
         }
 
         if( $VIDEO_OUT ) {
+            say "Outputting video to file \"$VIDEO_OUT\" . . . ";
             open( $VIDEO_OUT_FH, '>', $VIDEO_OUT )
                 or die "Can't open file for writing '$VIDEO_OUT': $!\n";
             my $file_handler = UAV::Pilot::Video::FileDump->new({
                 fh => $VIDEO_OUT_FH,
             });
             push @h264_handlers, $file_handler;
+            say "Video outputting to file";
         }
     }
 
     return @h264_handlers;
+}
+
+sub build_joystick
+{
+    my ($cv, $events, $easy_events) = @_;
+    say "Starting joystick . . . ";
+
+    my $joystick = UAV::Pilot::SDL::Joystick->new({
+        condvar => $cv,
+        events  => $easy_events,
+    });
+    $events->register( $joystick );
+
+    say "Joystick " . SDL::Joystick::name( $joystick->joystick->index )
+        . " ready";
+    return 1;
 }
 
 
@@ -207,7 +228,6 @@ sub build_video_handlers
     my $sdl_events = UAV::Pilot::SDL::Events->new;
     $events->register( $sdl_events );
 
-    say "Starting video stream . . . ";
     my @h264_handlers = build_video_handlers( $events );
     my $driver_video = UAV::Pilot::ARDrone::Video->new({
         handlers => \@h264_handlers,
@@ -215,7 +235,8 @@ sub build_video_handlers
         driver   => $driver,
     });
     $control->video( $driver_video );
-    say "Video stream started";
+
+    build_joystick( $cv, $events, $easy_event ) if $DO_JOYSTICK;
 
 
     say "Running . . .";

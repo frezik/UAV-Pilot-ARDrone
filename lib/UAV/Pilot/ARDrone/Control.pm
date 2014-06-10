@@ -27,6 +27,7 @@ use Moose;
 use namespace::autoclean;
 use DateTime;
 use String::CRC32 ();
+use UAV::Pilot::ARDrone::Driver;
 use UAV::Pilot::EasyEvent;
 use UAV::Pilot::NavCollector::AckEvents;
 
@@ -65,6 +66,12 @@ has 'in_air' => (
     isa     => 'Bool',
     default => 0,
     writer  => '_set_in_air',
+);
+has '_camera_state' => (
+    is  => 'rw',
+    isa => 'Int',
+    default => UAV::Pilot::ARDrone::Driver->
+        ARDRONE_CONFIG_VIDEO_CHANNEL_ZAP_CHANNEL_HORI,
 );
 
 with 'UAV::Pilot::Logger';
@@ -497,6 +504,24 @@ sub setup_read_nav_event
     return 1;
 }
 
+sub toggle_camera
+{
+    my ($self)     = @_;
+    my $driver     = $self->driver;
+    my $vert_state = $driver->ARDRONE_CONFIG_VIDEO_CHANNEL_ZAP_CHANNEL_VERT;
+    my $hori_state = $driver->ARDRONE_CONFIG_VIDEO_CHANNEL_ZAP_CHANNEL_HORI;
+    my $cur_state  = $self->_camera_state;
+
+    my $new_state = ($cur_state == $vert_state) ? $hori_state : $vert_state;
+    $self->send_config(
+        $driver->ARDRONE_CONFIG_VIDEO_VIDEO_CHANNEL,
+        $new_state,
+    );
+    $self->_camera_state( $new_state );
+
+    return 1;
+}
+
 
 sub _generate_session_id
 {
@@ -677,6 +702,11 @@ AR.Drone SDK docs for details.
 
 Send a config name/value.  If you used C<set_multiconfig()>, this will send 
 the necessary commands before the config setting.
+
+=head2 toggle_camera
+
+The AR.Drone has two cameras, one in front, and one on the bottom.  Calling 
+this will toggle between them.
 
 =head1 FLIGHT ANIMATION METHODS
 

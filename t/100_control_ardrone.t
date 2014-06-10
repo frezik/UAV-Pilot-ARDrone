@@ -21,7 +21,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
-use Test::More tests => 61;
+use Test::More tests => 63;
 use v5.14;
 use UAV::Pilot::ARDrone::Driver::Mock;
 use UAV::Pilot::ARDrone::Control;
@@ -379,6 +379,20 @@ my @TESTS = (
         args   => [ ],
         expect => [ qq{AT*CONFIG=~SEQ~,"video:video_on_usb","TRUE"\r} ],
         name   => "Record USB command",
+    },
+    # Next two need to be done in order, since the second one depends on the 
+    # state set by the first
+    {
+        method => 'toggle_camera',
+        args   => [],
+        expect => [ qq{AT*CONFIG=~SEQ~,"video:video_channel","1"\r} ],
+        name   => "Toggle camera to vert",
+    },
+    {
+        method => 'toggle_camera',
+        args   => [],
+        expect => [ qq{AT*CONFIG=~SEQ~,"video:video_channel","0"\r} ],
+        name   => "Toggle camera to hori",
     },
 );
 foreach my $test (@TESTS) {
