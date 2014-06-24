@@ -1,3 +1,11 @@
+1.0 ????
+
+- Fileno video decoding can dump to file on its own
+
+1.0_1 2014-06-11
+
+- Fix config dependency regarding ShareDir
+
 1.0_0 2014-06-05
 
 - Bump version number.  Really, that's it.

@@ -222,6 +222,7 @@ sub record_usb ()
         return 1;
     };
     my $start_video_external_process_fileno = sub {
+        my ($out_file) = @_;
         $init_events->();
 
         $vid_driver = UAV::Pilot::ARDrone::Video::Fileno->new({
@@ -231,7 +232,10 @@ sub record_usb ()
         my $fileno = $vid_driver->fileno;
 
         $SIG{CHLD} = 'IGNORE';
-        my @exec = ( VIDEO_EXTERNAL_STREAM_EXEC, '--fileno=' . $fileno );
+        my @exec = ( VIDEO_EXTERNAL_STREAM_EXEC,
+            '--fileno='   . $fileno,
+            (defined $out_file ? '--out-file=' . $out_file : ()),
+        );
         my $pid = 'MSWin32' eq $^O
             ? $fork_process_win32->( @exec )
             : $fork_process_unixy->( @exec );
@@ -304,15 +308,15 @@ sub record_usb ()
         return 1;
     }
 
-    sub start_video (;$)
+    sub start_video (;$$)
     {
-        my ($type) = @_;
+        my ($type, $out_file) = @_;
         $type //= 0;
 
         return
-            (0 == $type) ? $start_video_external_process_fileno->() :
-            (1 == $type) ? $start_video_external_process->() :
-            $start_video_single_process->();
+            (0 == $type) ?$start_video_external_process_fileno->($out_file):
+            (1 == $type) ? $start_video_external_process->( $out_file ) :
+            $start_video_single_process->( $out_file );
     }
 
     sub dump_video_to_file ($)
