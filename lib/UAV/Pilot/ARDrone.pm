@@ -1,4 +1,4 @@
-# Copyright (c) 2014  Timm Murray
+# Copyright (c) 2015  Timm Murray
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without 
@@ -22,12 +22,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
 package UAV::Pilot::ARDrone;
+
 use v5.14;
 use warnings;
 use Moose;
 use namespace::autoclean;
-
-our $VERSION = 1.0;
 
 # ABSTRACT: Implements the Parrot AR.Drone under UAV::Pilot
 
@@ -124,7 +123,7 @@ L<http://ardrone2.parrot.com> - AR.Drone Homepage
 
 =head1 LICENSE
 
-Copyright (c) 2014  Timm Murray
+Copyright (c) 2015  Timm Murray
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are 

@@ -1,6 +1,7 @@
-1.0 ????
+1.0 2015-06-09
 
 - Fileno video decoding can dump to file on its own
+- Cleanup dependency error on UAV::Pilot::SDL::Joystick in tests
 
 1.0_1 2014-06-11
 
